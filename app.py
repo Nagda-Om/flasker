@@ -15,7 +15,7 @@ def index():
     favourite_pizza = ['pepporoni','cheeze','garlic',41]
 
     return render_template('index.html', first_name=first_name, stuff=stuff, favourite_pizza=favourite_pizza)
-
+    
 @app.route('/user/<name>')
 def user(name):
     return render_template('user.html', name=name)
@@ -31,3 +31,7 @@ def page_not_found(e):
 def server_error(e):
     return render_template('404.html'), 500
 
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
