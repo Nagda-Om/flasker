@@ -123,7 +123,7 @@ git commit -am 'commit message'
     1. go to github create a repo with some-name
     2. apply the command given by github on to terminal i.e.
 ```bash
-git remote add origin https://github.com/user-name/Flasker.git
+git remote add origin https://github.com/user-name/flasker.git
 git branch -M main
 git push -u origin main
 ```
