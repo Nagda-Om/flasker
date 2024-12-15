@@ -1,0 +1,16 @@
+<h1>hello {{first_name}}</h1>
+<p>This is my first webpage...</p>
+<p> How are you </p>
+
+{{stuff | safe}}
+
+
+{% for i in favourite_pizza %}
+    {% if i == 41 %}
+        {{ i + 42}}
+    {% else %}
+        {{i}}
+    {% endif%}
+{% endfor %}
+
+
