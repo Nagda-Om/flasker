@@ -233,3 +233,161 @@ git push -u origin main
 
 ### Class-5 Webforms with WTF
 ---
+
+- `wtforms` is framework agnostic form system which have different ports to other languages suchas python, js etc, now before building website from wtfforms we have to define a secret key with forms their is something we called [**csrf-token**](https://www.geeksforgeeks.org/csrf-protection-in-flask/) it will sync up behind the scene with another secret-key at server to make sure a hacker hasn't hijackjed your form.
+
+
+
+| type of [fields](https://wtforms.readthedocs.io/en/2.3.x/fields/) | type of [validators]((https://wtforms.readthedocs.io/en/2.3.x/validators/))|
+|----------------|-------------------|
+|Boolean Field   |    DataRequired | 
+|DateField    |Email|
+|DateTimeField|EqualTo |
+|DecimalField| InputRequired       | 
+|FileField    |IpAddress
+|HiddenField|  MacAddress   | 
+|FloatField     |NumberRange| 
+|FormField      |Optional| 
+|IntegerField       |Regexp| 
+|PasswordField    |URL| 
+|RadioField   |UUID|
+|SelectField      |AnyOf| 
+|SelectMultipleField| Noneof| 
+|SubmitField     |     
+|StringField     |      
+|TextAreaField     |      
+
+```python
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+
+# create a Flask Instance
+app = Flask(__name__)
+load_dotenv()
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+
+# create a form class
+class NamerForm(FlaskForm):
+    name = StringField("whats your name? ", validators=[DataRequired()])
+    submit = SubmitField("submit")
+
+
+# create name page
+@app.route('/name',methods=['GET','POST'])
+def name():
+    name = None
+    form = NamerForm()
+
+    # validation stufff
+    if form.validate_on_submit():
+        name = form.name.data
+        form.name.data = ''
+    return render_template('name.html', name=name, form=form)
+```
+
+```html
+<!-- name.html -->
+{% extends 'base.html' %}
+{% block content %}
+
+{% if name %}
+    <h1>Hello {{name}}</h1>
+{% else %}
+    <h1>What's Your Name? </h1>
+    <br/>
+    <form method="post">
+        {{form.hidden_tag()}}     <!--csrf-token -->
+        {{form.name.label(class="form-label")}}       <!-- name lable from Namerform() class --> 
+        {{form.name(class="form-control")}}       <!-- 'name' variable value from namepage method -->
+    <br/>
+        {{form.submit(class="btn btn-secondary")}}       <!-- submit from Namerform() class -->
+    </form>
+{% endif %}
+{% endblock %}
+```
+<br/>
+<br/>
+
+
+### Class-6 flash messages
+---
+- flash is a class in flask module which can be used to flash message on screen and can be styled with bootstrap
+
+```python
+# app.py
+from flask import Flask, render_template, flash
+# create name page
+@app.route('/name',methods=['GET','POST'])
+def name():
+    name = None
+    form = NamerForm()
+
+    # validation stufff
+    if form.validate_on_submit():
+        name = form.name.data
+        form.name.data = ''
+        flash("Form Submitted Sucessfully") # flash to show message at this logic point
+    return render_template('name.html', name=name, form=form)
+```
+
+```html
+<!-- name.html -->
+
+{% for message in get_flashed_messages()%}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <!-- looping through each character and showing message and then styling it using bootstrap -->
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{%endfor%}
+
+```
+<br/>
+<br/>
+
+### Class-7 CSS, JS and images with Flask Static Files
+---
+- create your custom css file and override the bootstrap style for certain elements like this...
+```css
+/* ./static/css/style.css */
+h1{
+    color: darkblue;
+    font-size: 60px;
+}
+
+body{
+    background: #f4f4f4;
+}
+
+#demo{
+    font-size: xx-large;
+    color: black;
+}
+```
+<br/>
+
+```js
+// ./static/js/myfile.js
+document.getElementById('demo').innerHTML = ('This was created with javascript');
+```
+<br/>
+
+```html
+<!-- ./templates/base.html -->
+  <!-- our css -->
+<link href="{{url_for('static',filename='css/style.css')}}" rel="stylesheet">
+
+```
+<br/>
+
+```html
+<!-- ./templates/index.html -->
+{% if name %}
+    <h1>Hello {{name}}</h1>
+    <br/>
+    <img src="{{url_for('static',filename='images/img.jpg')}}" width="1100" >
+    <br/>
+    <p id="demo">This is  stuff</p>
+    <script src="{{url_for('static',filename='js/myfile.js')}}"></script>
+```
