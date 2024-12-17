@@ -391,3 +391,105 @@ document.getElementById('demo').innerHTML = ('This was created with javascript')
     <p id="demo">This is  stuff</p>
     <script src="{{url_for('static',filename='js/myfile.js')}}"></script>
 ```
+<br/>
+<br/>
+
+
+### Class-8 Flask with sqlite database using SQLAlchemy
+----
+- Before starting with sqlite we have to install a package for interacting with all type of databases i.e. `SQLAlchemy` using `pip install flask-sqlalchemy`
+
+```python
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from wtforms.validators import DataRequired, Email
+
+# Add Databse
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+db = SQLAlchemy(app)
+
+
+# Create Model
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    data_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Create A String
+    def __repr__(self):
+        return "<Name %r>" % self.name
+
+
+# Create a form class
+class UserForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[Email()])
+    submit = SubmitField("submit")
+
+@app.route("/user/add", methods=["GET", "POST"])
+def add_user():
+    name = None
+    form = UserForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(email=form.email.data).first()
+        if user is None:
+            user = Users(name=form.name.data, email=form.email.data)
+            db.session.add(user)
+            db.session.commit()
+        name = form.name.data
+        form.name.data = ""
+        form.email.data = ""
+        flash("User Added Successfully!")
+
+    our_users = Users.query.order_by(Users.data_added)
+    return render_template("add_user.html", name=name, form=form, our_users=our_users)
+  
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
+```
+
+```html
+{% extends 'base.html' %}
+{% block content %}
+
+{% for message in get_flashed_messages()%}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    
+    </div>
+{%endfor%}
+
+{% if name %}
+    <h1>User Added</h1><br/>
+    <table class="table table-hover table-bordered table-striped">
+        <tr>
+            <td>
+                {% for our_user in our_users %}
+                    {{ our_user.id }}. {{ our_user.name }} - {{ our_user.email }} 
+                {% endfor%}
+            </td>
+        </tr>
+    </table>
+
+{% else %} 
+    <h1>User List:</h1><br/>
+    <div class="shadow p-3 mb-5 bg-body rounded">
+    <form method="post">
+        {{form.hidden_tag()}}
+        {{form.name.label(class="form-label")}}
+        {{form.name(class="form-control")}}
+        {{form.email.label(class="form-label")}}
+        {{form.email(class="form-control")}<br/>
+        {{form.submit(class="btn btn-secondary")}}
+    </form><br/><br>
+    </div>
+    
+{% endif %}
+{% endblock %}
+```
