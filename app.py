@@ -6,14 +6,27 @@ from flask import Flask, flash, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired, Email
+from wtforms.validators import DataRequired
 
 app = Flask(__name__)
 
 
-# Add Databse
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+# add database ie. OLD Sqlite
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+# db = SQLAlchemy(app)
+
+# Add database i.e new mysql
+load_dotenv()
+localhost = os.environ.get("DB_HOST")
+user = os.environ.get("DB_USER")
+password = os.environ.get("DB_PASSWORD")
+database = os.environ.get("DB_DATABASE")
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    f"mysql+pymysql://{user}:{password}@{localhost}/{database}"
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Improves performance
 db = SQLAlchemy(app)
+
 
 # Loading secret-key
 load_dotenv()
@@ -35,7 +48,7 @@ class Users(db.Model):
 # Create a form class
 class UserForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
-    email = StringField("Email", validators=[Email()])
+    email = StringField("Email", validators=[DataRequired()])
     submit = SubmitField("submit")
 
 
@@ -91,6 +104,7 @@ def name():
     return render_template("name.html", name=name, form=form)
 
 
+# create a add_user page
 @app.route("/user/add", methods=["GET", "POST"])
 def add_user():
     name = None
@@ -110,7 +124,11 @@ def add_user():
     return render_template("add_user.html", name=name, form=form, our_users=our_users)
 
 
-if __name__ == "__main__":
+def create_tables():
     with app.app_context():
         db.create_all()
+
+
+if __name__ == "__main__":
+    create_tables()
     app.run(debug=True)

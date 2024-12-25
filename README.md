@@ -400,6 +400,7 @@ document.getElementById('demo').innerHTML = ('This was created with javascript')
 - Before starting with sqlite we have to install a package for interacting with all type of databases i.e. `SQLAlchemy` using `pip install flask-sqlalchemy`
 
 ```python
+# app.py
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from wtforms.validators import DataRequired, Email
@@ -451,8 +452,10 @@ if __name__ == "__main__":
         db.create_all()
     app.run(debug=True)
 ```
+<br/>
 
 ```html
+<!-- ./templates/add_user.html -->
 {% extends 'base.html' %}
 {% block content %}
 
@@ -492,4 +495,73 @@ if __name__ == "__main__":
     
 {% endif %}
 {% endblock %}
+```
+<br/>
+
+```sql
+-- ./instance/users.db
+
+-- open terminal and type this command...
+sqlite3 
+
+-- to open a file use this command with filename i.e. users.db
+.open FILENAME
+
+-- to search for different types of table 
+.tables 
+.table
+
+-- to check the schema of the table use
+.schema table_name
+
+-- to view the data/value in tables
+SELECT * FROM table_name;
+```
+<br/><br/>
+
+
+### Class-9 Flask with MySql database using SQLAlchemy
+----
+```python
+# app.py
+
+# Add database i.e new mysql
+load_dotenv()
+localhost = os.environ.get("DB_HOST")
+user = os.environ.get("DB_USER")
+password = os.environ.get("DB_PASSWORD")
+database = os.environ.get("DB_DATABASE")
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    f"mysql+pymysql://{user}:{password}@{localhost}/{database}")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Improves performance
+db = SQLAlchemy(app)
+
+def create_tables():
+    with app.app_context():
+        db.create_all()
+
+
+if __name__ == "__main__":
+    create_tables()
+    app.run(debug=True)
+```
+
+- `create_db.py` will execute the database creation command to initialize and create database using `mysql-connector-python` package.
+```python
+import mysql.connector
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+mydb = mysql.connector.connect(
+   host=os.environ.get('DB_HOST'),
+   user=os.environ.get('DB_USER'),
+   passwd=os.environ.get('DB_PASSWORD'),
+)
+
+mycursor = mydb.cursor()
+mycursor.execute("CREATE DATABASE users")
+mycursor.execute("SHOW DATABASES")
+for db in mycursor:
+   print(db)
 ```

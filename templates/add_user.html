@@ -16,7 +16,7 @@
         <tr>
             <td>
                 {% for our_user in our_users %}
-                    {{ our_user.id }}. {{ our_user.name }} - {{ our_user.email }} 
+                {{ our_user.id }}. {{ our_user.name }} - {{ our_user.email }}<br/>
                 {% endfor%}
             </td>
         </tr>
@@ -30,7 +30,7 @@
         {{form.name.label(class="form-label")}}
         {{form.name(class="form-control")}}
         {{form.email.label(class="form-label")}}
-        {{form.email(class="form-control")}<br/>
+        {{form.email(class="form-control")}}<br/>
         {{form.submit(class="btn btn-secondary")}}
     </form><br/><br>
     </div>
